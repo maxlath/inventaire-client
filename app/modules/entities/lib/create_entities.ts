@@ -3,6 +3,7 @@ import { newError } from '#app/lib/error'
 import { getIsbnData } from '#app/lib/isbn'
 import log_ from '#app/lib/loggers'
 import { arrayIncludes, objectEntries } from '#app/lib/utils'
+import type { Entity as EntityT } from '#app/types/entity'
 import { isNonEmptyClaimValue } from '#entities/components/editor/lib/editors_helpers'
 import { addModel as addEntityModel } from '#entities/lib/entities_models_index'
 import getOriginalLang from '#entities/lib/get_original_lang'
@@ -114,7 +115,7 @@ const subjectEntityP31ByProperty = {
   'wdt:P195': 'wd:Q20655472',
 }
 
-export async function createAndGetEntityModel (params) {
+export async function createAndGetEntityModel (params: Partial<EntityT> & { createOnWikidata?: boolean }) {
   const { claims } = params
   cleanupClaims(claims)
   const entityData = await createEntity(params)
