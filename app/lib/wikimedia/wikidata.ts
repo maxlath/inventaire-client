@@ -1,5 +1,8 @@
 import app from '#app/app'
 import { buildPath } from '#app/lib/location'
+import type { WdEntityId } from '#server/types/entity'
+
+const wdHost = 'https://www.wikidata.org'
 
 export function searchWikidataEntities (params) {
   const { search, limit, offset } = params
@@ -8,7 +11,7 @@ export function searchWikidataEntities (params) {
 
   const { lang } = app.user
 
-  return buildPath('https://www.wikidata.org/w/api.php', {
+  return buildPath(`${wdHost}/w/api.php`, {
     action: 'wbsearchentities',
     search,
     language: lang,
@@ -24,3 +27,11 @@ export function searchWikidataEntities (params) {
 export const unprefixify = value => value?.replace(/^wdt?:/, '')
 
 export const getUriNumericId = uri => parseInt(uri.split(':')[1].substring(1))
+
+export function getWdWikiUrl (wdId: WdEntityId) {
+  return `${wdHost}/wiki/${wdId}`
+}
+
+export function getWdHistoryUrl (wdId: WdEntityId) {
+  return `${wdHost}/w/index.php?title=${wdId}&action=history`
+}

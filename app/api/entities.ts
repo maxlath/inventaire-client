@@ -19,7 +19,7 @@ export default {
     })
   },
 
-  getAttributesByUris ({ uris, attributes, lang, relatives }) {
+  getAttributesByUris ({ uris, attributes, lang, relatives, refresh }) {
     const query: QueryParams = {
       uris: forceArray(uris).join('|'),
     }
@@ -30,6 +30,7 @@ export default {
       query.lang = lang
     }
     if (relatives != null) query.relatives = forceArray(relatives).join('|')
+    if (refresh === true) query.refresh = true
     return action('by-uris', query)
   },
 

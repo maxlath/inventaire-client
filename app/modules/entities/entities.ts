@@ -5,6 +5,7 @@ import { isPropertyUri, isEntityUri } from '#app/lib/boolean_tests'
 import { serverReportError, newError } from '#app/lib/error'
 import log_ from '#app/lib/loggers'
 import preq from '#app/lib/preq'
+import type { SerializedEntity, SerializedWdEntity } from '#entities/lib/entities'
 import { entityTypeNameBySingularType } from '#entities/lib/types/entities_types'
 import { i18n } from '#user/lib/i18n'
 import { getEntityByUri, normalizeUri } from './lib/entities.ts'
@@ -77,10 +78,13 @@ const controller = {
     app.execute('show:loader')
     uri = normalizeUri(uri)
 
-    // Make sure we have the freshest data before trying to edit
-    return getEntityModel(uri, true)
-    .then(showEntityEditFromModel)
-    .catch(handleMissingEntity.bind(null, uri))
+    try {
+      // Make sure we have the freshest data before trying to edit
+      const entity = await getEntityByUri({ uri, refresh: true })
+      await showEntityEdit(entity)
+    } catch (err) {
+      handleMissingEntity(uri, err)
+    }
   },
 
   async showEntityCreateFromRoute () {
@@ -304,43 +308,39 @@ async function getEntityModel (uri, refresh?) {
   }
 }
 
-async function showEntityEdit (params) {
-  const { model } = params
-  if (model.type == null) throw newError('invalid entity type', model)
-  const { default: EntityEdit } = await import('./components/editor/entity_edit.svelte')
-  app.layout.showChildComponent('main', EntityEdit, {
-    props: {
-      entity: model.toJSON(),
-    },
-  })
-  app.navigateFromModel(model, 'edit')
-}
-
-async function showEntityEditFromModel (model) {
-  const editRoute = model.get('edit')
-  if (!editRoute) {
-    const { uri, type } = model.toJSON()
+async function showEntityEdit (entity: SerializedEntity) {
+  const { uri, type, label, editPathname, isWikidataEntity } = entity
+  if (!editPathname) {
     throw newError('this entity can not be edited', 400, { uri, type })
   }
-  if (!app.request('require:loggedIn', model.get('edit'))) return
+  if (!app.request('require:loggedIn', editPathname)) return
 
-  rejectRemovedPlaceholder(model)
+  rejectRemovedPlaceholder(entity)
 
-  const prefix = model.get('prefix')
-  if ((prefix === 'wd') && !app.user.hasWikidataOauthTokens()) {
-    return showWikidataEditIntroModal(model)
+  if (isWikidataEntity && !app.user.hasWikidataOauthTokens()) {
+    return showWikidataEditIntroModal(entity)
   } else {
-    return showEntityEdit({ model })
+    if (type == null) throw newError('invalid entity type', 400, { entity })
+    const { default: EntityEdit } = await import('./components/editor/entity_edit.svelte')
+    app.layout.showChildComponent('main', EntityEdit, {
+      props: {
+        entity,
+      },
+    })
+    app.navigate(editPathname, { metadata: { title: `${label} - ${i18n('edit')}` } })
   }
 }
 
-async function showWikidataEditIntroModal (model) {
-  const { default: WikidataEditIntro } = await import('./views/wikidata_edit_intro.ts')
-  app.layout.showChildView('modal', new WikidataEditIntro({ model }))
+async function showWikidataEditIntroModal (entity: SerializedWdEntity) {
+  const { default: WikidataEditIntro } = await import('./components/wikidata_edit_intro.svelte')
+  app.layout.showChildComponent('main', WikidataEditIntro, { props: { entity } })
 }
 
-function rejectRemovedPlaceholder (entity) {
-  if (entity.get('_meta_type') === 'removed:placeholder') {
+function rejectRemovedPlaceholder (entity: Backbone.Model | SerializedEntity) {
+  let metaType
+  if (entity instanceof Backbone.Model) metaType = entity.get('_meta_type')
+  if ('_meta_type' in entity) metaType = entity._meta_type
+  if (metaType === 'removed:placeholder') {
     throw newError('removed placeholder', 400, { entity })
   }
 }
