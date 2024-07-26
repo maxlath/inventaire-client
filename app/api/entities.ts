@@ -58,7 +58,7 @@ export default {
   },
 
   changes: action('changes'),
-  history: id => action('history', { id }),
+  history: (uri: EntityUri) => action('history', { uri }),
 
   popularity (uris, refresh) {
     uris = forceArray(uris).join('|')
