@@ -5,13 +5,14 @@
   import { loadInternalLink } from '#app/lib/utils'
   import { getTypePropertiesPerCategory } from '#entities/components/editor/lib/editors_properties'
   import PropertyCategory from '#entities/components/editor/property_category.svelte'
+  import type { SerializedEntity } from '#entities/lib/entities'
   import getBestLangValue from '#entities/lib/get_best_lang_value'
   import { typesPossessiveForms } from '#entities/lib/types/entities_types'
   import { i18n, I18n } from '#user/lib/i18n'
   import EntityEditMenu from './entity_edit_menu.svelte'
   import LabelsEditor from './labels_editor.svelte'
 
-  export let entity
+  export let entity: SerializedEntity
 
   const { uri, type, labels } = entity
   const goToEntityPageLabel = `Go to the ${typesPossessiveForms[type]} page`

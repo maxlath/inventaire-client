@@ -8,17 +8,18 @@
   import Dropdown from '#components/dropdown.svelte'
   import Spinner from '#components/spinner.svelte'
   import { getWikidataUrl } from '#entities/lib/entities'
+  import type { SerializedEntity } from '#entities/lib/entities'
   import { checkWikidataMoveabilityStatus, moveToWikidata } from '#entities/lib/move_to_wikidata'
   import { i18n, I18n } from '#user/lib/i18n'
 
-  export let entity
+  export let entity: SerializedEntity
 
   let flash
-  const { uri, invUri, label, history } = entity
+  const { uri, isWikidataEntity, invUri, wdUri, label, historyPathname } = entity
   const { hasDataadminAccess } = app.user
-  const wikidataUrl = getWikidataUrl(uri)
+  const wikidataUrl = wdUri ? getWikidataUrl(wdUri) : null
   const { ok: canBeMovedToWikidata, reason: moveabilityStatus } = checkWikidataMoveabilityStatus(entity)
-  const canBeDeleted = invUri != null
+  const canBeDeleted = !isWikidataEntity
   let waitForWikidataMove
 
   async function _moveToWikidata () {
@@ -82,13 +83,15 @@
           />
         </li>
       {/if}
-      <li>
-        <Link
-          url={history}
-          text={I18n('entity history')}
-          icon="history"
-        />
-      </li>
+      {#if historyPathname}
+        <li>
+          <Link
+            url={historyPathname}
+            text={I18n('entity history')}
+            icon="history"
+          />
+        </li>
+      {/if}
       {#if hasDataadminAccess}
         <li>
           <Link
@@ -109,20 +112,22 @@
           </li>
         {/if}
       {/if}
-      <li>
-        <button
-          disabled={!canBeMovedToWikidata}
-          title={moveabilityStatus}
-          on:click={_moveToWikidata}
-        >
-          {#await waitForWikidataMove}
-            <Spinner />
-          {:then}
-            {@html icon('wikidata')}
-          {/await}
-          {I18n('move to Wikidata')}
-        </button>
-      </li>
+      {#if !isWikidataEntity}
+        <li>
+          <button
+            disabled={!canBeMovedToWikidata}
+            title={moveabilityStatus}
+            on:click={_moveToWikidata}
+          >
+            {#await waitForWikidataMove}
+              <Spinner />
+            {:then}
+              {@html icon('wikidata')}
+            {/await}
+            {I18n('move to Wikidata')}
+          </button>
+        </li>
+      {/if}
       <li>
         <button
           title={I18n('report_an_error_in_entity_data')}
