@@ -32,8 +32,6 @@
 
   let getInputValue, flash, valueLabel, previousValue, previousValueLabel
 
-  const updateUri = uri?.split(':')[0] === 'isbn' ? `inv:${entity._id}` : uri
-
   function showEditMode () {
     if (inputValue === Symbol.for('removed')) inputValue = null
     editMode = true
@@ -70,7 +68,7 @@
       if (!creationMode) {
         app.execute('invalidate:entities:cache', uri)
         await preq.put(API.entities.claims.update, {
-          uri: updateUri,
+          uri,
           property,
           'old-value': savedValue,
           'new-value': typeof newValue === 'symbol' ? null : newValue,
