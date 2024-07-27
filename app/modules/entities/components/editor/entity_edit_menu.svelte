@@ -194,10 +194,6 @@
         margin-inline-end: 0.5em;
       }
     }
-    /* Not very small screens */
-    @media screen and (width >= $very-small-screen){
-      white-space: nowrap;
-    }
   }
   li{
     @include display-flex(row, stretch);
