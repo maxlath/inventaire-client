@@ -12,7 +12,7 @@
 
   let waitForEntityRefresh
 
-  const { uri, type, claims } = entity
+  const { uri, wdUri, type, claims } = entity
 
   async function refreshEntity () {
     startRefreshTimeSpan(entity.uri)
@@ -20,8 +20,8 @@
     app.navigateAndLoad(`${entity.pathname}?refresh=true`)
   }
 
-  const wikidataUrl = getWikidataUrl(uri)
-  const wikidataHistoryUrl = getWikidataHistoryUrl(uri)
+  const wikidataUrl = wdUri ? getWikidataUrl(wdUri) : null
+  const wikidataHistoryUrl = wdUri ? getWikidataHistoryUrl(wdUri) : null
 </script>
 
 {#if showEntityEditButtons}
@@ -63,7 +63,7 @@
     />
   </li>
 {:else}
-  {#if claims['wdt:P212']}
+  {#if claims['wdt:P212'] && !wdUri}
     <li>
       <button
         on:click={refreshEntity}
