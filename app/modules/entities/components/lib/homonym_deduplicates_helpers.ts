@@ -73,7 +73,7 @@ const getSearchTermsSelection = (labels, aliases) => {
 const isMultiWordTerm = term => getWordsCount(term) > 1
 const getWordsCount = term => term.split(' ').length
 
-const getTerms = (labels, aliases) => {
+const getTerms = (labels, aliases = {}) => {
   const terms = Object.values(labels)
     .concat(Object.values(aliases).flat())
     // Order term words to not search both "foo bar" and "bar foo"

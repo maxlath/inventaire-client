@@ -51,14 +51,10 @@ const controller = {
     app.execute('show:loader')
 
     try {
-      const model = await getEntityModel(uri, refresh)
-      rejectRemovedPlaceholder(model)
-      const { view, Component, props } = await getEntityViewByType(model)
-      if (Component) {
-        app.layout.showChildComponent('main', Component, { props })
-      } else if (view) {
-        app.layout.showChildView('main', view)
-      }
+      const entity = await getEntityByUri({ uri, refresh })
+      rejectRemovedPlaceholder(entity)
+      const { Component, props } = await getEntityViewByType(entity)
+      app.layout.showChildComponent('main', Component, { props })
     } catch (err) {
       handleMissingEntity(uri, err)
     }
@@ -336,11 +332,8 @@ async function showWikidataEditIntroModal (entity: SerializedWdEntity) {
   app.layout.showChildComponent('main', WikidataEditIntro, { props: { entity } })
 }
 
-function rejectRemovedPlaceholder (entity: Backbone.Model | SerializedEntity) {
-  let metaType
-  if (entity instanceof Backbone.Model) metaType = entity.get('_meta_type')
-  if ('_meta_type' in entity) metaType = entity._meta_type
-  if (metaType === 'removed:placeholder') {
+function rejectRemovedPlaceholder (entity: SerializedEntity) {
+  if ('_meta_type' in entity && entity._meta_type === 'removed:placeholder') {
     throw newError('removed placeholder', 400, { entity })
   }
 }

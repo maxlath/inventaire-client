@@ -3,9 +3,11 @@
   import { icon } from '#app/lib/icons'
   import Dropdown from '#components/dropdown.svelte'
   import EntityLayoutActions from '#entities/components/layouts/entity_layout_actions.svelte'
+  import type { SerializedEntity } from '#entities/lib/entities'
   import { i18n } from '#user/lib/i18n'
 
-  export let entity, showEntityEditButtons
+  export let entity: SerializedEntity
+  export let showEntityEditButtons: boolean
 </script>
 
 {#if $screen.isLargerThan('$small-screen')}

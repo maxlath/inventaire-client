@@ -289,7 +289,7 @@ const placeholderAttributes = {
   sitelinks: {},
 }
 
-const defaultClaimPropertyByType = {
+export const defaultClaimPropertyByType = {
   movement: 'wdt:P135',
   genre: 'wdt:P136',
   subject: 'wdt:P921',

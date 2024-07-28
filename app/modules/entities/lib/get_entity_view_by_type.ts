@@ -1,9 +1,9 @@
 import { newError } from '#app/lib/error'
-import { getEntities } from '#entities/lib/entities'
+import { getEntities, type SerializedEntity } from '#entities/lib/entities'
+import { defaultClaimPropertyByType } from '../models/entity'
 
-export default async function getEntityViewByType (model) {
-  const entity = model.toJSON()
-  const { type } = model
+export default async function getEntityViewByType (entity: SerializedEntity) {
+  const { type } = entity
 
   const getter = entityViewSpecialGetterByType[type]
   if (getter != null) return getter(entity)
@@ -23,7 +23,7 @@ export default async function getEntityViewByType (model) {
     ({ default: Component } = await import('#entities/components/layouts/article.svelte'))
   } else {
     ({ default: Component } = await import('#entities/components/layouts/claim_layout.svelte'))
-    const property = model.defaultClaimProperty || 'wdt:P921'
+    const property = defaultClaimPropertyByType[type] || 'wdt:P921'
     return { Component, props: { entity, property } }
   }
   return { Component, props: { entity } }
