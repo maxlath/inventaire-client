@@ -36,20 +36,18 @@
 </script>
 
 <div class="item-notes">
-  <div class="header">
-    <span class="section-label">{I18n('private notes')}</span>
-    <span class="indicator" title={i18n('this is visible by anyone who can see this item')}>
-      {@html icon('lock')}
-    </span>
-    <button
-      title={i18n('edit')}
-      on:click={() => editMode = true}
-    >
-      {@html icon('pencil')}
-    </button>
-  </div>
   {#if editMode}
+    <div
+      class="header"
+      title={i18n('edit')}
+    >
+      <span class="section-label">{I18n('private notes')}</span>
+      <span class="indicator" title={i18n('this is visible by anyone who can see this item')}>
+        {@html icon('lock')}
+      </span>
+    </div>
     <textarea
+      class="notes"
       placeholder={`(${i18n('notes_placeholder')})`}
       bind:value={notes}
       use:autofocus
@@ -71,6 +69,21 @@
       </button>
     </div>
   {:else}
+    <button
+      class="header"
+      title={i18n('edit')}
+      on:click={() => editMode = true}
+    >
+      <span class="section-label">{I18n('private notes')}</span>
+      <span>
+        <span class="indicator" title={i18n('this is visible by anyone who can see this item')}>
+          {@html icon('lock')}
+        </span>
+        <span>
+          {@html icon('pencil')}
+        </span>
+      </span>
+    </button>
     <div class="text">
       <button
         on:click={() => editMode = true}
@@ -109,7 +122,11 @@
     line-height: inherit;
   }
   .header{
-    @include display-flex(row, center);
+    @include display-flex(row, center, space-between);
+    width: 100%;
+  }
+  .notes{
+    margin-block-start: 0.5em;
   }
   .indicator{
     margin-inline-start: auto;

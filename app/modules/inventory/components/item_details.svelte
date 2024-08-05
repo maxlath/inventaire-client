@@ -37,24 +37,19 @@
 </script>
 
 <div class="item-details">
-  <div class="header">
-    <span class="section-label">{I18n('details')}</span>
-    {#if !restricted}
-      <span class="indicator" title={i18n('this is visible by anyone who can see this item')}>
-        {#if visibilitySummaryIconName}
-          {@html icon(visibilitySummaryIconName)}
-        {/if}
-      </span>
-      <button
-        title={i18n('edit')}
-        on:click={() => editMode = true}
-      >
-        {@html icon('pencil')}
-      </button>
-    {/if}
-  </div>
   {#if editMode}
+    <div class="header">
+      <span class="section-label">{I18n('details')}</span>
+      {#if !restricted}
+        <span class="indicator" title={i18n('this is visible by anyone who can see this item')}>
+          {#if visibilitySummaryIconName}
+            {@html icon(visibilitySummaryIconName)}
+          {/if}
+        </span>
+      {/if}
+    </div>
     <textarea
+      class="details"
       placeholder={`(${i18n('details_placeholder')})`}
       bind:value={details}
       use:autofocus
@@ -76,6 +71,26 @@
       </button>
     </div>
   {:else}
+    <button
+      class="header"
+      title={i18n('edit')}
+      on:click={() => editMode = true}
+    >
+      <span class="section-label">{I18n('details')}</span>
+      {#if !restricted}
+        <span>
+          <span class="indicator" title={i18n('this is visible by anyone who can see this item')}>
+            {#if visibilitySummaryIconName}
+              {@html icon(visibilitySummaryIconName)}
+            {/if}
+          </span>
+          <button>
+            {@html icon('pencil')}
+          </button>
+        </span>
+      {/if}
+    </button>
+
     <div class="text">
       {#if restricted}
         <p>{@html userContent(details)}</p>
@@ -110,9 +125,10 @@
     line-height: inherit;
   }
   .header{
-    @include display-flex(row, center);
+    @include display-flex(row, center, space-between);
+    width: 100%;
   }
-  .indicator{
-    margin-inline-start: auto;
+  .details{
+    margin-block-start: 0.5em;
   }
 </style>
