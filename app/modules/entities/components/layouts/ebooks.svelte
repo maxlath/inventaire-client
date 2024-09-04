@@ -2,7 +2,7 @@
   import app from '#app/app'
   import { isNonEmptyArray } from '#app/lib/boolean_tests'
   import Link from '#app/lib/components/link.svelte'
-  import sitelinks_ from '#app/lib/wikimedia/sitelinks'
+  import { getWikisourceData } from '#app/lib/wikimedia/sitelinks'
   import { formatEbooksClaim } from '#entities/components/lib/claims_helpers'
   import { i18n } from '#user/lib/i18n'
 
@@ -21,7 +21,7 @@
   formatAndAssignEbooks('wdt:P724')
   formatAndAssignEbooks('wdt:P4258')
 
-  const wikisourceLink = sitelinks_.wikisource(entity.sitelinks, userLang, entity.originalLang)
+  const wikisourceLink = getWikisourceData(entity.sitelinks, userLang, entity.originalLang)
 </script>
 {#if isNonEmptyArray(ebooksData)}
   <div class="ebooks">

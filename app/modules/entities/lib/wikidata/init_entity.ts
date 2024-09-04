@@ -3,7 +3,7 @@ import { getTextDirection } from '#app/lib/active_languages'
 import { isNonEmptyString } from '#app/lib/boolean_tests'
 import { buildPath } from '#app/lib/location'
 import log_ from '#app/lib/loggers'
-import sitelinks_ from '#app/lib/wikimedia/sitelinks'
+import { getWikipediaData, getWikisourceData } from '#app/lib/wikimedia/sitelinks'
 import { unprefixify } from '#app/lib/wikimedia/wikidata'
 import wikipedia_ from '#app/lib/wikimedia/wikipedia'
 import getBestLangValue from '#entities/lib/get_best_lang_value'
@@ -37,9 +37,9 @@ const setWikiLinks = function (lang) {
   const sitelinks = this.get('sitelinks')
   if (sitelinks != null) {
     // @ts-expect-error
-    updates.wikipedia = sitelinks_.wikipedia(sitelinks, lang, this.originalLang)
+    updates.wikipedia = getWikipediaData(sitelinks, lang, this.originalLang)
     // @ts-expect-error
-    updates.wikisource = sitelinks_.wikisource(sitelinks, lang, this.originalLang)
+    updates.wikisource = getWikisourceData(sitelinks, lang, this.originalLang)
   }
 
   this.set(updates)

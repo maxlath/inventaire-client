@@ -1,37 +1,37 @@
 import { omit } from 'underscore'
 import { buildPath } from '#app/lib/location'
 import { fixedEncodeURIComponent } from '#app/lib/utils'
+import type { SimplifiedSitelinks } from '#server/types/entity'
+import type { WikimediaLanguageCode } from 'wikibase-sdk'
 
-export default {
-  // lang: the user's lang
-  // original lang: the entity's original lang
-  wikipedia (sitelinks, lang, originalLang) {
-    // Wikimedia Commons is confusingly using a sitelink key that makes it look like
-    // a Wikipedia sitelink - commonswiki - thus the need to omit it before proceeding
-    // https://www.wikidata.org/wiki/Help:Sitelinks#Linking_to_Wikimedia_site_pages
-    sitelinks = omit(sitelinks, 'commonswiki')
-    return getBestWikiProjectInfo({
-      sitelinks,
-      projectBaseName: 'wiki',
-      projectRoot: 'wikipedia',
-      lang,
-      originalLang,
-    })
-  },
+// lang: the user's lang
+// original lang: the entity's original lang
+export function getWikipediaData (sitelinks: SimplifiedSitelinks, lang: WikimediaLanguageCode, originalLang: WikimediaLanguageCode) {
+  // Wikimedia Commons is confusingly using a sitelink key that makes it look like
+  // a Wikipedia sitelink - commonswiki - thus the need to omit it before proceeding
+  // https://www.wikidata.org/wiki/Help:Sitelinks#Linking_to_Wikimedia_site_pages
+  sitelinks = omit(sitelinks, 'commonswiki')
+  return getBestWikiProjectInfo({
+    sitelinks,
+    projectBaseName: 'wiki',
+    projectRoot: 'wikipedia',
+    lang,
+    originalLang,
+  })
+}
 
-  wikisource (sitelinks, lang, originalLang) {
-    const wsData = getBestWikiProjectInfo({
-      sitelinks,
-      projectBaseName: 'wikisource',
-      projectRoot: 'wikisource',
-      lang,
-      originalLang,
-    })
-    if (wsData != null) {
-      wsData.epub = getEpubLink(wsData)
-      return wsData
-    }
-  },
+export function getWikisourceData (sitelinks: SimplifiedSitelinks, lang: WikimediaLanguageCode, originalLang: WikimediaLanguageCode) {
+  const wsData = getBestWikiProjectInfo({
+    sitelinks,
+    projectBaseName: 'wikisource',
+    projectRoot: 'wikisource',
+    lang,
+    originalLang,
+  })
+  if (wsData != null) {
+    wsData.epub = getEpubLink(wsData)
+    return wsData
+  }
 }
 
 interface WikisourceData {
@@ -41,7 +41,7 @@ interface WikisourceData {
   epub?: string
 }
 
-const getBestWikiProjectInfo = function (params) {
+function getBestWikiProjectInfo (params) {
   const { sitelinks, projectBaseName, projectRoot, lang, originalLang } = params
   if (sitelinks == null) return
 
@@ -71,7 +71,7 @@ const getBestWikiProjectInfo = function (params) {
 
 const getWikiProjectTitle = (sitelinks, projectBaseName, lang) => sitelinks[`${lang}${projectBaseName}`]?.title
 
-const pickOneWikiProjectTitle = function (sitelinks, projectBaseName) {
+function pickOneWikiProjectTitle (sitelinks, projectBaseName) {
   for (const projectName in sitelinks) {
     const value = sitelinks[projectName]
     const match = projectName.split(projectBaseName)
@@ -88,7 +88,7 @@ const pickOneWikiProjectTitle = function (sitelinks, projectBaseName) {
   return []
 }
 
-const getEpubLink = function (wikisourceData) {
+function getEpubLink (wikisourceData) {
   const { title, lang } = wikisourceData
   return buildPath('http://wsexport.wmflabs.org/tool/book.php', {
     lang,
