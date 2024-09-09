@@ -259,7 +259,7 @@ function setHandlers () {
     'report:entity:type:issue': reportTypeIssue,
     'show:wikidata:edit:intro:modal': async uri => {
       const model = await app.request('get:entity:model', uri)
-      showWikidataEditIntroModal(model)
+      showWikidataEditIntro(model)
     },
   })
 
@@ -314,7 +314,7 @@ async function showEntityEdit (entity: SerializedEntity) {
   rejectRemovedPlaceholder(entity)
 
   if (isWikidataEntity && !app.user.hasWikidataOauthTokens()) {
-    return showWikidataEditIntroModal(entity)
+    return showWikidataEditIntro(entity)
   } else {
     if (type == null) throw newError('invalid entity type', 400, { entity })
     const { default: EntityEdit } = await import('./components/editor/entity_edit.svelte')
@@ -327,7 +327,7 @@ async function showEntityEdit (entity: SerializedEntity) {
   }
 }
 
-async function showWikidataEditIntroModal (entity: SerializedWdEntity) {
+async function showWikidataEditIntro (entity: SerializedWdEntity) {
   const { default: WikidataEditIntro } = await import('./components/wikidata_edit_intro.svelte')
   app.layout.showChildComponent('main', WikidataEditIntro, { props: { entity } })
 }

@@ -8,8 +8,6 @@
   import type { SerializedEntity } from '#entities/lib/entities'
   import { i18n, I18n } from '#user/lib/i18n'
 
-  // app.execute('modal:open', 'medium')
-
   export let entity: SerializedEntity
 
   const { loggedIn } = app.user
@@ -22,7 +20,6 @@
   }
 
   function login (e) {
-    // app.execute('modal:close')
     loadInternalLink(e)
   }
 </script>
