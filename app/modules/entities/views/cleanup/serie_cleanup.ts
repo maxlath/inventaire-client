@@ -7,11 +7,11 @@ import Toggler from '#behaviors/toggler'
 import { getReverseClaims } from '#entities/lib/entities'
 import { I18n, i18n } from '#user/lib/i18n'
 import CleanupWorks from './collections/cleanup_works.ts'
-import fillGaps from './lib/fill_gaps.ts'
+import { fillGaps } from './lib/fill_gaps.ts'
 import getPartsSuggestions from './lib/get_parts_suggestions.ts'
 import moveModelOnOrdinalChange from './lib/move_model_on_ordinal_change.ts'
 import { createPlaceholders, removePlaceholder, removePlaceholdersAbove } from './lib/placeholders.ts'
-import spreadPart from './lib/spread_part.ts'
+import { spreadParts } from './lib/spread_part.ts'
 import SerieCleanupEditions from './serie_cleanup_editions.ts'
 import PartsSuggestions from './serie_cleanup_part_suggestion.ts'
 import SerieCleanupWorks from './serie_cleanup_works.ts'
@@ -55,8 +55,8 @@ export default Marionette.View.extend({
     this.numberKey = `{${i18n('number')}}`
     this.titlePattern = `${this.titleKey} - ${I18n('volume')} ${this.numberKey}`
     this.allAuthorsUris = this.model.getAllAuthorsUris()
-    this.model.parts.forEach(spreadPart.bind(this))
-    fillGaps.call(this)
+    // this.model.parts.forEach(spreadParts.bind(this))
+    // fillGaps.call(this)
     this.initEventListeners()
 
     this._states = app.request('querystring:get:all')
@@ -159,7 +159,7 @@ export default Marionette.View.extend({
     this.partsNumber = parseInt(value)
     if (this.partsNumber === this.maxOrdinal) return
     if (this.partsNumber > this.maxOrdinal) {
-      fillGaps.call(this)
+      // fillGaps.call(this)
     } else {
       this.removePlaceholdersAbove(this.partsNumber)
     }
@@ -212,7 +212,7 @@ export default Marionette.View.extend({
     this.titlePattern = e.currentTarget.value
     const placeholders = this.worksWithOrdinal.filter(isPlaceholder)
     this.worksWithOrdinal.remove(placeholders)
-    return fillGaps.call(this)
+    // return fillGaps.call(this)
   },
 
   updatePlaceholderCreationButton () {
@@ -228,7 +228,7 @@ export default Marionette.View.extend({
 
   async showPartsSuggestions () {
     const serie = this.model
-    const addToSerie = spreadPart.bind(this)
+    const addToSerie = spreadParts.bind(this)
     const collection = await getPartsSuggestions(serie)
     if (!this.isIntact()) return
     this.showChildView('partsSuggestionsRegion', new PartsSuggestions({

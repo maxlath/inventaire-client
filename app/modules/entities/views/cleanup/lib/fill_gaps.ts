@@ -1,35 +1,45 @@
-import { max, last } from 'underscore'
-import entityDraftModel from '#entities/lib/entity_draft_model'
+import { last, pluck } from 'underscore'
+import { arrayIncludes } from '#app/lib/utils'
+import type { SerializedEntity } from '#app/modules/entities/lib/entities'
+import type { EntityUri, EntityValue, SimplifiedClaims } from '#server/types/entity'
 
-export default function () {
-  const existingOrdinals = this.worksWithOrdinal.map(model => model.get('ordinal'))
-  if (this.partsNumber == null) this.partsNumber = 0
+export interface SeriePartPlaceholder {
+  type: 'work'
+  label: string
+  claims: SimplifiedClaims
+  serieOrdinalNum: number
+  isPlaceholder: true
+}
+
+export function fillGaps (worksWithOrdinal: (SerializedEntity | SeriePartPlaceholder)[], serieUri: EntityUri, serieLabel: string, titlePattern: string, titleKey: string, numberKey: string, partsNumber = 0) {
+  const existingOrdinals = pluck(worksWithOrdinal, 'serieOrdinalNum')
   const lastOrdinal = last(existingOrdinals)
-  const end = max([ this.partsNumber, lastOrdinal ])
-  if (end < 1) return
+  const end = Math.max(partsNumber, lastOrdinal)
+  if (end < 1) return worksWithOrdinal
+  function getPlaceholderTitle (index: number) {
+    return titlePattern
+    .replace(titleKey, serieLabel)
+    .replace(numberKey, index.toString())
+  }
   const newPlaceholders = []
-  for (let i = 1, end1 = end, asc = end1 >= 1; asc ? i <= end1 : i >= end1; asc ? i++ : i--) {
-    if (!existingOrdinals.includes(i)) newPlaceholders.push(getPlaceholder.call(this, i))
+  for (let i = 0; i <= end; i++) {
+    if (!arrayIncludes(existingOrdinals, i)) newPlaceholders.push(getPlaceholder(i, serieUri, getPlaceholderTitle))
   }
-  return this.worksWithOrdinal.add(newPlaceholders)
+  return worksWithOrdinal.concat(newPlaceholders)
 }
 
-const getPlaceholder = function (index) {
-  const serieUri = this.model.get('uri')
-  const label = getPlaceholderTitle.call(this, index)
+function getPlaceholder (index: number, serieUri: EntityUri, getPlaceholderTitle) {
+  const label = getPlaceholderTitle(index)
   const claims = {
-    'wdt:P179': [ serieUri ],
-    'wdt:P1545': [ `${index}` ],
+    'wdt:P179': [ serieUri as EntityValue ],
+    'wdt:P1545': [ `${index}` as `${number}` ],
   }
-  const model = entityDraftModel.create({ type: 'work', label, claims })
-  model.set('ordinal', index)
-  model.set('isPlaceholder', true)
-  return model
-}
-
-const getPlaceholderTitle = function (index) {
-  const serieLabel = this.model.get('label')
-  return this.titlePattern
-  .replace(this.titleKey, serieLabel)
-  .replace(this.numberKey, index)
+  const placeholder: SeriePartPlaceholder = {
+    type: 'work',
+    label,
+    claims,
+    serieOrdinalNum: index,
+    isPlaceholder: true,
+  }
+  return placeholder
 }

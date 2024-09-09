@@ -1,22 +1,26 @@
 import { isPositiveIntegerString } from '#app/lib/boolean_tests'
+import type { SerializedEntity } from '#app/modules/entities/lib/entities'
 
-export default function (part) {
-  const ordinal = part.get('claims.wdt:P1545.0')
-
-  if (!isPositiveIntegerString(ordinal)) {
-    this.worksWithoutOrdinal.add(part)
-    return
+export function spreadParts (parts: SerializedEntity[]) {
+  const worksWithoutOrdinal = []
+  const worksInConflicts = []
+  const worksWithOrdinal = []
+  let maxOrdinal = 0
+  for (const part of parts) {
+    const { serieOrdinal } = part
+    if (isPositiveIntegerString(serieOrdinal)) {
+      const ordinalInt = parseInt(serieOrdinal)
+      if (ordinalInt > maxOrdinal) maxOrdinal = ordinalInt
+      part.serieOrdinalNum = ordinalInt
+      const currentOrdinalValue = worksWithOrdinal[ordinalInt]
+      if (currentOrdinalValue != null) {
+        worksInConflicts.push(part)
+      } else {
+        worksWithOrdinal.push(part)
+      }
+    } else {
+      worksWithoutOrdinal.push(part)
+    }
   }
-
-  const ordinalInt = parseInt(ordinal)
-  if (ordinalInt > this.maxOrdinal) this.maxOrdinal = ordinalInt
-
-  part.set('ordinal', ordinalInt)
-
-  const currentOrdinalValue = this.worksWithOrdinal[ordinalInt]
-  if (currentOrdinalValue != null) {
-    return this.worksInConflicts.add(part)
-  } else {
-    return this.worksWithOrdinal.add(part)
-  }
+  return { worksWithOrdinal, worksWithoutOrdinal, worksInConflicts, maxOrdinal }
 }

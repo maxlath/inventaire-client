@@ -21,11 +21,13 @@ export interface SerializedEntityCommons {
   description: string
   publicationYear?: string
   serieOrdinal?: string
+  serieOrdinalNum?: number
   title?: string
   subtitle?: string
   pathname?: RelativeUrl
   editPathname?: RelativeUrl
   historyPathname?: RelativeUrl
+  cleanupPathname?: RelativeUrl
   prefix: EntityUriPrefix
   // Can be set by #app/lib/types/work_alt.ts#setEntityImages
   images?: Url[]
@@ -123,6 +125,8 @@ export function serializeEntity (entity: Entity & Partial<SerializedEntity>) {
   const basePathname = entity.pathname = getPathname(entity.uri)
   entity.editPathname = `${basePathname}/edit`
   entity.historyPathname = `${basePathname}/history`
+  entity.cleanupPathname = `${basePathname}/cleanup`
+
   let wdUri, invUri
   let isWikidataEntity = false
   if ('wdId' in entity) {

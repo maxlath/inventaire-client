@@ -1,3 +1,4 @@
+<!-- CHANGING MULTI VISIBILITY NOT SEEN ON INVENTORY BELOW -->
 <script context="module" lang="ts">
   import type { GroupId } from '#server/types/group'
   import type { ShelfId } from '#server/types/shelf'

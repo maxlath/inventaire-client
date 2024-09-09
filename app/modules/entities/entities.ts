@@ -5,10 +5,10 @@ import { isPropertyUri, isEntityUri } from '#app/lib/boolean_tests'
 import { serverReportError, newError } from '#app/lib/error'
 import log_ from '#app/lib/loggers'
 import preq from '#app/lib/preq'
-import type { SerializedEntity, SerializedWdEntity } from '#entities/lib/entities'
+import { type SerializedEntity, type SerializedWdEntity, getEntityByUri, normalizeUri } from '#entities/lib/entities'
 import { entityTypeNameBySingularType } from '#entities/lib/types/entities_types'
-import { i18n } from '#user/lib/i18n'
-import { getEntityByUri, normalizeUri } from './lib/entities.ts'
+import type { EntityUri } from '#server/types/entity'
+import { I18n, i18n } from '#user/lib/i18n'
 import * as entitiesModelsIndex from './lib/entities_models_index.ts'
 import { entityDataShouldBeRefreshed, startRefreshTimeSpan } from './lib/entity_refresh.ts'
 import getEntityViewByType from './lib/get_entity_view_by_type.ts'
@@ -148,14 +148,16 @@ const controller = {
     })
   },
 
-  showEntityCleanup (uri) {
+  async showEntityCleanup (uri: EntityUri) {
     if (app.request('require:loggedIn', `entity/${uri}/cleanup`)) {
       app.execute('show:loader')
       uri = normalizeUri(uri)
-
-      return getEntityModel(uri, true)
-      .then(showEntityCleanupFromModel)
-      .catch(handleMissingEntity.bind(null, uri))
+      try {
+        const entity = await getEntityByUri({ uri, refresh: true })
+        showEntityCleanup(entity)
+      } catch (err) {
+        handleMissingEntity(uri, err)
+      }
     }
   },
 
@@ -338,7 +340,7 @@ function rejectRemovedPlaceholder (entity: SerializedEntity) {
   }
 }
 
-function handleMissingEntity (uri, err) {
+function handleMissingEntity (uri: EntityUri, err: Error) {
   if (err.message === 'invalid entity type') {
     app.execute('show:error:other', err)
   } else if (err.message === 'entity_not_found') {
@@ -440,7 +442,7 @@ function reportTypeIssue (params) {
 
 const reportedTypeIssueUris = []
 
-async function showEntityCleanupFromModel (entity) {
+async function showEntityCleanup (entity: SerializedEntity) {
   if (entity.type !== 'serie') {
     const err = newError(`cleanup isn't available for entity type ${entity.type}`, 400)
     app.execute('show:error', err)
@@ -448,10 +450,12 @@ async function showEntityCleanupFromModel (entity) {
   }
 
   const [ { default: SerieCleanup } ] = await Promise.all([
-    import('./views/cleanup/serie_cleanup.ts'),
-    entity.initSerieParts({ refresh: true, fetchAll: true }),
+    import('./components/cleanup/serie_cleanup.svelte'),
+    // entity.initSerieParts({ refresh: true, fetchAll: true }),
   ])
 
-  app.layout.showChildView('main', new SerieCleanup({ model: entity }))
-  app.navigateFromModel(entity, 'cleanup')
+  app.layout.showChildComponent('main', SerieCleanup, {
+    props: { entity },
+  })
+  app.navigate(entity.cleanupPathname, { metadata: { title: `${entity.label} - ${I18n('cleanup')}` } })
 }

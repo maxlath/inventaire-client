@@ -36,11 +36,12 @@
       <input id="titlePattern" name="pattern" value="{{titlePattern}}">
     </div>
 
-    <a id="createPlaceholders" class="tiny-button light-blue {{#unless placeholderCounter}}hidden{{/unless}}">
+    <button class="create-placeholders tiny-button light-blue">
       {{I18n 'create all the missing parts'}}
       <span class="counter">({{placeholderCounter}})</span>
       <span class="loading"></span>
-    </a>
+    </button>
+    {/if}
   </div>
 </div>
 

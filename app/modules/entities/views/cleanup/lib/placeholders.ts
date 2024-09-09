@@ -1,13 +1,13 @@
 import { startLoading } from '#general/plugins/behaviors'
 
-export const createPlaceholders = function () {
+export function createPlaceholders () {
   if (this._placeholderCreationOngoing) return
   this._placeholderCreationOngoing = true
 
   const views = Object.values(this.getRegion('worksWithOrdinalRegion').currentView.children._views)
   startLoading.call(this, { selector: '#createPlaceholders', timeout: 300 })
 
-  const createSequentially = function () {
+  function createSequentially () {
     const nextView = views.shift()
     if (nextView == null) return
     // @ts-expect-error
@@ -22,14 +22,14 @@ export const createPlaceholders = function () {
   })
 }
 
-export const removePlaceholder = function (ordinalInt) {
+export function removePlaceholder (ordinalInt) {
   const existingModel = this.worksWithOrdinal.findWhere({ ordinal: ordinalInt })
   if ((existingModel != null) && existingModel.get('isPlaceholder')) {
     return this.worksWithOrdinal.remove(existingModel)
   }
 }
 
-export const removePlaceholdersAbove = function (num) {
+export function removePlaceholdersAbove (num) {
   const toRemove = this.worksWithOrdinal.filter(model => model.get('isPlaceholder') && (model.get('ordinal') > num))
   return this.worksWithOrdinal.remove(toRemove)
 }

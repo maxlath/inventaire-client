@@ -1,3 +1,4 @@
+<!-- Update member list after leaving group -->
 <script lang="ts">
   import { tick } from 'svelte'
   import { debounce } from 'underscore'
