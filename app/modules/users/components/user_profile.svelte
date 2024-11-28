@@ -7,6 +7,7 @@
   import { imgSrc } from '#app/lib/handlebars_helpers/images'
   import { userContent } from '#app/lib/handlebars_helpers/user_content'
   import { icon } from '#app/lib/icons'
+  import preq from '#app/lib/preq'
   import { getISODay, getISOTime } from '#app/lib/time'
   import UserInventory from '#inventory/components/user_inventory.svelte'
   import UsersListings from '#listings/components/users_listings.svelte'
@@ -21,11 +22,20 @@
   export let standalone = false
   export let focusedSection
 
-  // TODO: recover inventoryLength and shelvesCount
-  const { _id: userId, username, bio, picture, inventoryLength, shelvesCount, created } = user
+  const {
+    _id: userId,
+    username,
+    bio,
+    picture,
+    inventoryLength,
+    shelvesCount,
+    created,
+    fediversable,
+  } = user
+
   const { hasAdminAccess: mainUserHasAdminAccess } = app.user
 
-  let flash, userProfileEl
+  let flash, userProfileEl, followersCount, waitingForFollowersCount
 
   async function onFocus () {
     if (!userProfileEl) await tick()
@@ -55,6 +65,15 @@
     app.navigate(pathname, { pageSectionElement, metadata })
   }
 
+  if (fediversable) {
+    waitingForFollowersCount = getFollowersCount()
+  }
+
+  async function getFollowersCount () {
+    const res = await preq.get(API.activitypub.followers(username))
+    followersCount = res.totalItems
+  }
+
   $: if ($focusedSection.type === 'user') onFocus()
 </script>
 
@@ -78,16 +97,24 @@
         </h2>
         <ul class="data">
           {#if inventoryLength != null}
-            <li class="inventoryLength">
+            <li class="inventory-length">
               <span>{@html icon('book')}{i18n('books')}</span>
               <span class="count">{inventoryLength}</span>
             </li>
           {/if}
           {#if shelvesCount != null}
-            <li class="showShelvesList shelvesLength">
+            <li class="show-shelves-list shelves-length">
               <span>{@html icon('server')}{i18n('shelves')}</span>
               <span class="count">{shelvesCount}</span>
             </li>
+          {/if}
+          {#if fediversable}
+            {#await waitingForFollowersCount then}
+              <li class="followers-count">
+                <span>{@html icon('address-book')}{i18n('followers')}</span>
+                <span class="count">{followersCount}</span>
+              </li>
+            {/await}
           {/if}
         </ul>
         {#if $screen.isLargerThan('$smaller-screen')}
@@ -162,9 +189,12 @@
       margin-inline-end: 1em;
     }
   }
-  .inventoryLength, .showShelvesList{
+  .inventory-length, .show-shelves-list, .followers-count{
+    :global(.fa){
+      padding-inline-end: 1.5em;
+    }
     .count{
-      padding-inline-start: 0.5em;
+      padding-inline-start: 0.3em;
     }
   }
   .bio-wrapper{
