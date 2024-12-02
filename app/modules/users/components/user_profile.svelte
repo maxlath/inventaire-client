@@ -9,6 +9,7 @@
   import { icon } from '#app/lib/icons'
   import preq from '#app/lib/preq'
   import { getISODay, getISOTime } from '#app/lib/time'
+  import { loadInternalLink } from '#app/lib/utils'
   import UserInventory from '#inventory/components/user_inventory.svelte'
   import UsersListings from '#listings/components/users_listings.svelte'
   import { I18n, i18n } from '#user/lib/i18n'
@@ -70,7 +71,7 @@
   }
 
   async function getFollowersCount () {
-    const res = await preq.get(API.activitypub.followers(username))
+    const res = await preq.get(API.activitypub.followers({ name: username }))
     followersCount = res.totalItems
   }
 
@@ -111,8 +112,10 @@
           {#if fediversable}
             {#await waitingForFollowersCount then}
               <li class="followers-count">
-                <span>{@html icon('address-book')}{i18n('followers')}</span>
-                <span class="count">{followersCount}</span>
+                <a href="{username}/followers" on:click={loadInternalLink}>
+                  <span>{@html icon('address-book')}{i18n('followers')}</span>
+                  <span class="count">{followersCount}</span>
+                </a>
               </li>
             {/await}
           {/if}
@@ -196,6 +199,10 @@
     .count{
       padding-inline-start: 0.3em;
     }
+  }
+  .followers-count a{
+    cursor: pointer;
+    color: #666;
   }
   .bio-wrapper{
     @include radius;

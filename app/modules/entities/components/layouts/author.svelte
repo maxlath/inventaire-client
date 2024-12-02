@@ -72,7 +72,7 @@
       </div>
     </div>
     <!-- waiting for subentities to not display relative entities list before work browser -->
-    <!-- to not having to push them down while work broser is being displayed -->
+    <!-- to not having to push them down while work browser is being displayed -->
     {#await waitingForSubEntities then}
       <div class="relatives-lists">
         <RelativeEntitiesList
