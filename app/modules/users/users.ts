@@ -150,7 +150,12 @@ async function showUserContributions (idOrUsernameOrModel, filter) {
 async function showUserFollowers (username) {
   try {
     const { default: ActorFollowers } = await import('#activitypub/components/actor_followers.svelte')
-    app.layout.showChildComponent('main', ActorFollowers, { props: { actorName: username } })
+    app.layout.showChildComponent('main', ActorFollowers, {
+      props: {
+        actorName: username,
+        standalone: true,
+      },
+    })
   } catch (err) {
     app.execute('show:error', err)
   }

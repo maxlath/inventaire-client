@@ -3,6 +3,7 @@
   import { debounce } from 'underscore'
   import { isNonEmptyPlainObject } from '#app/lib/boolean_tests'
   import { onChange } from '#app/lib/svelte/svelte'
+  import ActorFollowersSection from '#entities/components/layouts/actor_followers_section.svelte'
   import RelativeEntitiesList from '#entities/components/layouts/relative_entities_list.svelte'
   import Summary from '#entities/components/layouts/summary.svelte'
   import WorksBrowser from '#entities/components/layouts/works_browser.svelte'
@@ -88,6 +89,7 @@
           />
         {/each}
       </div>
+      <ActorFollowersSection uri={entity.uri} />
       <HomonymDeduplicates {entity} />
     {/await}
   </div>

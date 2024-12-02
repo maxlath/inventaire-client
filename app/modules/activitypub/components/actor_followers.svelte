@@ -6,7 +6,7 @@
   import InfiniteScroll from '#components/infinite_scroll.svelte'
   import { i18n } from '#user/lib/i18n'
 
-  export let actorName
+  export let actorName, standalone = false
   let flash, fetching
   let hasMore = true
   let remoteFollowers = []
@@ -46,7 +46,9 @@
   }
 </script>
 
-<h2>{i18n('fediverse_followers', { actorName })}</h2>
+{#if standalone}
+  <h2>{i18n('followers_of', { actorName })}</h2>
+{/if}
 
 <Flash state={flash} />
 

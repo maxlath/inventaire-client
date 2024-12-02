@@ -11,6 +11,7 @@
   import { isNonEmptyPlainObject } from '#app/lib/boolean_tests'
   import { onChange } from '#app/lib/svelte/svelte'
   import { loadInternalLink } from '#app/lib/utils'
+  import ActorFollowersSection from '#entities/components/layouts/actor_followers_section.svelte'
   import Summary from '#entities/components/layouts/summary.svelte'
   import WorksBrowser from '#entities/components/layouts/works_browser.svelte'
   import { getSubentitiesTypes } from '#entities/components/lib/claim_layout_helpers'
@@ -97,6 +98,7 @@
         />
       {/each}
     </div>
+    <ActorFollowersSection uri={entity.uri} />
   </div>
 </BaseLayout>
 
