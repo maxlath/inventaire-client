@@ -22,6 +22,7 @@
   export let groupId = null
   export let standalone = false
   export let focusedSection
+  export let showShelfFollowers
 
   const {
     _id: userId,
@@ -150,6 +151,7 @@
       {focusedSection}
       bind:selectedShelf={shelf}
       bind:flash
+      {showShelfFollowers}
     />
   {/if}
 </div>

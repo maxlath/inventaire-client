@@ -6,12 +6,13 @@
   import InfiniteScroll from '#components/infinite_scroll.svelte'
   import { i18n } from '#user/lib/i18n'
 
-  export let actorName, standalone = false
+  export let actorName, actorLabel, standalone = false
   let flash, fetching
   let hasMore = true
   let remoteFollowers = []
   const limit = 10
   let offset = 0
+  if (!actorLabel) actorLabel = actorName
 
   async function fetchMore () {
     try {
