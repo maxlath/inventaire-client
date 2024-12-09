@@ -13,8 +13,9 @@
   import { user } from '#user/user_store'
   import EmailValidation from './email_validation.svelte'
 
-  let flashLang, flashEmail, flashFediversable
+  let flashLang, flashEmail, flashDiscoverability
   let fediversable = $user.fediversable
+  let poolActivities = $user.poolActivities
   let userLang = $user.language
   let emailValue = $user.email
 
@@ -74,7 +75,7 @@
   }
 
   const toggleFediversable = async () => {
-    flashFediversable = null
+    flashDiscoverability = null
     fediversable = !fediversable
     try {
       await app.request('user:update', {
@@ -83,7 +84,21 @@
       })
     } catch (err) {
       fediversable = !fediversable
-      flashFediversable = err
+      flashDiscoverability = err
+    }
+  }
+
+  const togglePoolActivities = async () => {
+    flashDiscoverability = null
+    poolActivities = !poolActivities
+    try {
+      await app.request('user:update', {
+        attribute: 'poolActivities',
+        value: poolActivities,
+      })
+    } catch (err) {
+      poolActivities = !poolActivities
+      flashDiscoverability = err
     }
   }
 
@@ -151,7 +166,17 @@
         on:click={toggleFediversable} />
       {i18n('Fediverse integration')}
     </label>
-    <Flash bind:state={flashFediversable} />
+    <!-- I18n copy/pasted from fediversable_description last paragraph: To prevent sending too many messages, when several books are added at about the same time, only one summary message will be sent. -->
+    <p class="note">{@html I18n('pooling_activities_description')}</p>
+    <label class="inline">
+      <input
+        type="checkbox"
+        disabled={!fediversable}
+        bind:checked={poolActivities}
+        on:click={togglePoolActivities} />
+      {i18n('Regroup recent publications in a single activity')}
+    </label>
+    <Flash bind:state={flashDiscoverability} />
   </fieldset>
 
   <fieldset class="danger-zone">
@@ -187,6 +212,7 @@
   .note{
     color: $grey;
     font-size: 0.9rem;
+    margin-block-start: 1em;
     margin-block-end: 1em;
   }
 </style>
