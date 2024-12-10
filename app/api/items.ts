@@ -40,6 +40,10 @@ export default {
     return action('recent-public', { limit, lang, 'assert-image': assertImage })
   },
 
+  byBbox (bbox, limit, lang) {
+    return action('by-bbox', { bbox, limit, lang })
+  },
+
   nearby (limit, offset, range = 50) { return action('nearby', { limit, offset, range }) },
 
   inventoryView (params) { return action('inventory-view', params) },
