@@ -14,7 +14,8 @@
   import { getBrowserLocalLang } from '#user/lib/solve_lang'
   import { getDocsByPosition } from '#users/components/lib/public_users_nav_helpers'
 
-  let items = [], users = [], groups = [], selectedUser, selectedGroup
+  export let items = []
+  let users = [], groups = [], selectedUser, selectedGroup
 
   // Arbitrary position (Lyon, France),
   // to not ask to geolocate as soon as landing on the page.

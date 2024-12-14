@@ -3,12 +3,14 @@
   import LandingScreen from '#welcome/components/landing_screen.svelte'
   import PublicMap from '#welcome/components/public_map.svelte'
   import SomePublicBooks from '#welcome/components/some_public_books.svelte'
+
+  let items = []
 </script>
 
 <div class="welcome-layout">
   <LandingScreen />
-  <PublicMap />
-  <SomePublicBooks />
+  <PublicMap bind:items />
+  <SomePublicBooks {items} />
   <LandingPageFooter />
   <div class="background-cover" />
 </div>
