@@ -11,12 +11,16 @@
   // TODO: split markers style between components
   import '#map/scss/objects_markers.scss'
   import Flash from '#app/lib/components/flash.svelte'
+  import { icon } from '#app/lib/icons'
   import isMobile from '#app/lib/mobile_check'
   import { onChange } from '#app/lib/svelte/svelte'
+  import Spinner from '#general/components/spinner.svelte'
   import LocationSearchInput from '#map/components/location_search_input.svelte'
   import mapConfig from '#map/lib/config.ts'
   import { uniqBounds } from '#map/lib/map'
+  import { getPositionFromNavigator } from '#map/lib/navigator_position'
   import { fitResultBbox } from '#map/lib/nominatim'
+  import { i18n } from '#user/lib/i18n'
 
   mapConfig.init()
 
@@ -26,16 +30,24 @@
   export let zoom = 13
   export let cluster = false
   export let showLocationSearchInput = false
+  export let showFindPositionFromGeolocation = false
 
   export let map: Map = null
 
   let clusterGroup, flash
   let destroyed = false
+  let waitingForPosition
 
   const dispatch = createEventDispatcher()
 
   setContext('map', () => map)
   setContext('layer', () => clusterGroup || map)
+
+  function findPositionFromGeolocation () {
+    waitingForPosition = getPositionFromNavigator()
+      .then(({ lat, lng }) => view = [ lat, lng ])
+      .catch(err => flash = err)
+  }
 
   async function initLeafletMap (node) {
     try {
@@ -128,12 +140,23 @@
 <div class="map-wrapper">
   <Flash state={flash} />
 
-  {#if showLocationSearchInput && map}
-    <div class="location-search-input-wrapper">
-      <LocationSearchInput on:selectLocation={e => fitResultBbox(map, e.detail)} />
-    </div>
-  {/if}
-
+  <div class="location-search-input-wrapper">
+    {#if map}
+      {#if showLocationSearchInput}
+        <LocationSearchInput on:selectLocation={e => fitResultBbox(map, e.detail)} />
+      {/if}
+      {#if showFindPositionFromGeolocation}
+        <button on:click={findPositionFromGeolocation} class="tiny-button">
+          {#await waitingForPosition}
+            <Spinner />
+          {:then}
+            {@html icon('crosshairs')}
+          {/await}
+          {i18n('Geolocate')}
+        </button>
+      {/if}
+    {/if}
+  </div>
   <div class="map" use:createLeaflet>
     {#if map}
       <slot {map} />
@@ -168,5 +191,9 @@
     max-height: calc(100% - 4em);
     @include radius;
     @include display-flex(column);
+  }
+  .tiny-button{
+    margin: 0.5em 0;
+    line-height: 2em;
   }
 </style>
