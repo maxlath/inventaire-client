@@ -1,8 +1,11 @@
 <script lang="ts">
   import { createEventDispatcher, tick } from 'svelte'
+  import ActorFollowers from '#activitypub/components/actor_followers.svelte'
+  import { API } from '#app/api/api'
   import app from '#app/app'
   import { imgSrc } from '#app/lib/handlebars_helpers/images'
   import { icon } from '#app/lib/icons'
+  import preq from '#app/lib/preq'
   import { BubbleUpComponentEvent, onChange } from '#app/lib/svelte/svelte'
   import Modal from '#components/modal.svelte'
   import InventoryBrowser from '#inventory/components/inventory_browser.svelte'
@@ -14,20 +17,22 @@
 
   export let shelf = null
   export let withoutShelf = false
-  export let isMainUser
+  export let user
   export let itemsShelvesByIds
   export let focusedSection
+  export let showShelfFollowers
 
   let itemsCount, shelfBoxEl
-
-  let name, description, picture, iconData, iconLabel, isEditable, pathname
+  const { isMainUser, fediversable } = user
+  let name, description, picture, iconData, iconLabel, isEditable, pathname, visibility = []
   function refreshData () {
-    ;({ name, description, picture, iconData, iconLabel, isEditable, pathname } = serializeShelfData(shelf, withoutShelf))
+    ;({ name, description, picture, iconData, iconLabel, isEditable, pathname, visibility } = serializeShelfData(shelf, withoutShelf))
   }
   $: onChange(shelf, refreshData)
 
   let showShelfEditor = false
   let showShelfItemsAdder = false
+  let waitingForFollowersCount, followersCount
 
   const dispatch = createEventDispatcher()
   const closeShelf = () => dispatch('closeShelf')
@@ -44,6 +49,29 @@
     shelf = shelf
   }
 
+  function showFollowersModal () {
+    showShelfFollowers = true
+    app.navigate(`/shelves/${shelf._id}/followers`)
+  }
+
+  waitingForFollowersCount = getFollowersCount()
+
+  async function getFollowersCount () {
+    if (fediversable && visibility.includes('public')) {
+      const name = `shelf-${shelf._id}`
+      const res = await preq.get(API.activitypub.followers({ name }))
+      followersCount = res.totalItems
+    } else {
+      followersCount = null
+    }
+  }
+
+  function closeFollowersModal () {
+    showShelfFollowers = false
+    app.navigate(`/shelves/${shelf._id}`)
+  }
+
+  $: onChange(shelf, getFollowersCount)
   $: if ($focusedSection.type === 'shelf') onFocus()
 </script>
 
@@ -74,11 +102,21 @@
                 <span class="count">{itemsCount}</span>
               </li>
             {/if}
-            {#if shelf.visibility}
+            {#if visibility}
               <li id="listing" title={i18n('Visible by')}>
                 {@html icon(iconData.icon)} {i18n(iconLabel)}
               </li>
             {/if}
+            {#await waitingForFollowersCount then}
+              {#if followersCount}
+                <li class="followers-count">
+                  <a href="/shelves/{shelf._id}/followers" on:click={showFollowersModal}>
+                    <span>{@html icon('address-book')}{i18n('followers')}</span>
+                    <span class="count">{followersCount}</span>
+                  </a>
+                </li>
+              {/if}
+            {/await}
           </ul>
         {/if}
         <p class="description">{description}</p>
@@ -151,6 +189,17 @@
   </Modal>
 {/if}
 
+{#if showShelfFollowers}
+  <Modal on:closeModal={closeFollowersModal}
+  >
+    <ActorFollowers
+      actorName="shelf-{shelf._id}"
+      actorLabel={shelf.name}
+      standalone={true}
+    />
+  </Modal>
+{/if}
+
 <style lang="scss">
   @import "#general/scss/utils";
   .full-shelf-box{
@@ -199,6 +248,10 @@
     li{
       margin-inline-end: 1em;
     }
+  }
+  .followers-count a{
+    cursor: pointer;
+    color: #666;
   }
   .count{
     padding-inline-start: 0.5em;

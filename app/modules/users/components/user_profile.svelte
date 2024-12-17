@@ -1,5 +1,6 @@
 <script lang="ts">
   import { tick } from 'svelte'
+  import ActorFollowers from '#activitypub/components/actor_followers.svelte'
   import { API } from '#app/api/api'
   import app from '#app/app'
   import Flash from '#app/lib/components/flash.svelte'
@@ -7,7 +8,9 @@
   import { imgSrc } from '#app/lib/handlebars_helpers/images'
   import { userContent } from '#app/lib/handlebars_helpers/user_content'
   import { icon } from '#app/lib/icons'
+  import preq from '#app/lib/preq'
   import { getISODay, getISOTime } from '#app/lib/time'
+  import Modal from '#components/modal.svelte'
   import UserInventory from '#inventory/components/user_inventory.svelte'
   import UsersListings from '#listings/components/users_listings.svelte'
   import { I18n, i18n } from '#user/lib/i18n'
@@ -20,19 +23,34 @@
   export let groupId = null
   export let standalone = false
   export let focusedSection
+  export let showShelfFollowers
+  export let showUserFollowers
 
-  // TODO: recover inventoryLength and shelvesCount
-  const { _id: userId, username, bio, picture, inventoryLength, shelvesCount, created } = user
+  const {
+    _id: userId,
+    username,
+    bio,
+    picture,
+    inventoryLength,
+    shelvesCount,
+    created,
+    fediversable,
+  } = user
+
   const { hasAdminAccess: mainUserHasAdminAccess } = app.user
 
-  let flash, userProfileEl
+  let flash, userProfileEl, followersCount, waitingForFollowersCount
 
   async function onFocus () {
     if (!userProfileEl) await tick()
+    shelf = null
+    navigateToSection()
+  }
+
+  function navigateToSection () {
     // Let app.navigate scroll to the page top when UserProfile
     // is already at the top itself (standalone mode), to make the UsersHomeNav visible
     const pageSectionElement = standalone ? null : userProfileEl
-    shelf = null
     let pathname, title, rss
     if (profileSection === 'inventory') {
       pathname = user.inventoryPathname
@@ -41,6 +59,9 @@
     } else if (profileSection === 'listings') {
       pathname = user.listingsPathname
       title = `${username} - ${I18n('lists')}`
+    } else if ($focusedSection.type === 'shelf') {
+      pathname = `/shelves/${shelf._id}`
+      title = `${username} - ${i18n('Inventory')}`
     } else {
       title = username
       pathname = user.pathname
@@ -53,6 +74,25 @@
       rss,
     }
     app.navigate(pathname, { pageSectionElement, metadata })
+  }
+
+  if (fediversable) {
+    waitingForFollowersCount = getFollowersCount()
+  }
+
+  async function getFollowersCount () {
+    const res = await preq.get(API.activitypub.followers({ name: username }))
+    followersCount = res.totalItems
+  }
+
+  function showFollowersModal () {
+    showUserFollowers = true
+    app.navigate(`/users/${username}/followers`)
+  }
+
+  function closeFollowersModal () {
+    showUserFollowers = false
+    navigateToSection()
   }
 
   $: if ($focusedSection.type === 'user') onFocus()
@@ -78,16 +118,26 @@
         </h2>
         <ul class="data">
           {#if inventoryLength != null}
-            <li class="inventoryLength">
+            <li class="inventory-length">
               <span>{@html icon('book')}{i18n('books')}</span>
               <span class="count">{inventoryLength}</span>
             </li>
           {/if}
           {#if shelvesCount != null}
-            <li class="showShelvesList shelvesLength">
+            <li class="show-shelves-list shelves-length">
               <span>{@html icon('server')}{i18n('shelves')}</span>
               <span class="count">{shelvesCount}</span>
             </li>
+          {/if}
+          {#if fediversable}
+            {#await waitingForFollowersCount then}
+              <li class="followers-count">
+                <a href="{username}/followers" on:click={showFollowersModal}>
+                  <span>{@html icon('address-book')}{i18n('followers')}</span>
+                  <span class="count">{followersCount}</span>
+                </a>
+              </li>
+            {/await}
           {/if}
         </ul>
         {#if $screen.isLargerThan('$smaller-screen')}
@@ -120,9 +170,20 @@
       {focusedSection}
       bind:selectedShelf={shelf}
       bind:flash
+      {showShelfFollowers}
     />
   {/if}
 </div>
+
+{#if showUserFollowers}
+  <Modal on:closeModal={closeFollowersModal}
+  >
+    <ActorFollowers
+      actorName={username}
+      standalone={true}
+    />
+  </Modal>
+{/if}
 
 <style lang="scss">
   @import "#general/scss/utils";
@@ -162,10 +223,17 @@
       margin-inline-end: 1em;
     }
   }
-  .inventoryLength, .showShelvesList{
-    .count{
-      padding-inline-start: 0.5em;
+  .inventory-length, .show-shelves-list, .followers-count{
+    :global(.fa){
+      padding-inline-end: 1.5em;
     }
+    .count{
+      padding-inline-start: 0.3em;
+    }
+  }
+  .followers-count a{
+    cursor: pointer;
+    color: #666;
   }
   .bio-wrapper{
     @include radius;

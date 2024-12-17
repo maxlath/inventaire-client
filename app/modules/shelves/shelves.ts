@@ -9,6 +9,7 @@ export default {
     const Router = Marionette.AppRouter.extend({
       appRoutes: {
         'shelves/without(/)': 'showItemsWithoutShelf',
+        'shelves/(:id)/followers(/)': 'showShelfFollowers',
         'shelves(/)(:id)(/)': 'showShelfFromId',
         // Redirection
         'shelf(/)(:id)(/)': 'showShelfFromId',
@@ -39,7 +40,7 @@ async function showShelfFromId (shelfId) {
 
 const controller = {
   showShelfFromId,
-
+  showShelfFollowers,
   async showItemsWithoutShelf () {
     const pathname = 'shelves/without'
     if (app.request('require:loggedIn', pathname)) {
@@ -77,4 +78,26 @@ async function showShelf (shelf) {
   const metadata = getShelfMetadata(shelf)
   const { url: pathname } = metadata
   app.navigate(pathname, { metadata })
+}
+
+async function showShelfFollowers (shelfId) {
+  try {
+    const [
+      { default: UsersHomeLayout },
+      shelf,
+    ] = await Promise.all([
+      import('#users/components/users_home_layout.svelte'),
+      getById(shelfId),
+    ])
+    const user = await app.request('resolve:to:user', shelf.owner)
+    app.layout.showChildComponent('main', UsersHomeLayout, {
+      props: {
+        shelf,
+        user,
+        showShelfFollowers: true,
+      },
+    })
+  } catch (err) {
+    app.execute('show:error', err)
+  }
 }

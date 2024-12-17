@@ -1,5 +1,6 @@
 import { i18nContentHash } from '#assets/js/build_metadata'
 import type { RelativeUrl } from '#server/types/common'
+import activitypub from './activitypub.ts'
 import auth from './auth.ts'
 import data from './data.ts'
 import { getEndpointBase } from './endpoint.ts'
@@ -20,6 +21,7 @@ import users from './users.ts'
 
 export const API = {
   // /api endpoints
+  activitypub,
   auth,
   config: getEndpointBase('config'),
   data,

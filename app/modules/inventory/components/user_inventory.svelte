@@ -12,6 +12,7 @@
   export let groupId = null
   export let flash
   export let focusedSection
+  export let showFollowers
 
   const { isMainUser } = user
 
@@ -55,7 +56,7 @@
   <ShelfBox
     withoutShelf={true}
     on:closeShelf={onCloseShelf}
-    {isMainUser}
+    {user}
     {itemsShelvesByIds}
     {focusedSection}
     on:selectShelf={onSelectShelf}
@@ -64,10 +65,11 @@
   <ShelfBox
     bind:shelf={selectedShelf}
     on:closeShelf={onCloseShelf}
-    {isMainUser}
+    {user}
     {itemsShelvesByIds}
     {focusedSection}
     on:selectShelf={onSelectShelf}
+    {showFollowers}
   />
 {:else}
   <InventoryBrowser

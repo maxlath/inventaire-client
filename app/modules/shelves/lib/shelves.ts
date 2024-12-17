@@ -7,6 +7,7 @@ import preq, { treq } from '#app/lib/preq'
 import { getVisibilitySummary, getVisibilitySummaryLabel, visibilitySummariesData } from '#general/lib/visibility'
 import type { ShelvesByIdsResponse } from '#server/controllers/shelves/by_ids'
 import type { ShelvesByOwnersResponse } from '#server/controllers/shelves/by_owners'
+import type { Shelf } from '#server/types/shelf'
 import type { UserId } from '#server/types/user'
 
 export function getById (id) {
@@ -70,7 +71,7 @@ const shelfActionReq = (id, itemsIds, action) => {
   .then(getShelf)
 }
 
-const getShelf = ({ shelves }) => Object.values(shelves)[0]
+const getShelf = ({ shelves }) => Object.values(shelves)[0] as Shelf
 
 export function serializeShelf (shelf) {
   const { _id, visibility } = shelf

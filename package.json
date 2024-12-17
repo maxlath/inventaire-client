@@ -12,6 +12,7 @@
     "node": ">= 16"
   },
   "imports": {
+    "#activitypub/*": "./app/modules/activitypub/*.js",
     "#app/*": "./app/*.js",
     "#assets/*": "./app/assets/*.js",
     "#behaviors/*": "./app/modules/general/behaviors/*.js",
