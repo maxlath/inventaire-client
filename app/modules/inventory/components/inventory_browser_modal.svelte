@@ -54,6 +54,7 @@
         ownerId={user?._id}
         groupId={group?._id}
         {isMainUser}
+        frozenDisplay="table"
       />
     </Modal>
   </div>

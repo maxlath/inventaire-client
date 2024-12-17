@@ -8,7 +8,7 @@
   import InventoryBrowserTextFilter from '#inventory/components/inventory_browser_text_filter.svelte'
   import { I18n, i18n } from '#user/lib/i18n'
 
-  export let waitForInventoryData, facetsSelectors, facetsSelectedValues, intersectionWorkUris, textFilterItemsIds, inventoryDisplay
+  export let waitForInventoryData, facetsSelectors, facetsSelectedValues, intersectionWorkUris, textFilterItemsIds, inventoryDisplay, frozenDisplay
 
   const displayOptions = [
     { value: 'cascade', icon: 'th-large', text: I18n('cascade') },
@@ -70,14 +70,16 @@
           </div>
         {/await}
       </div>
-      <div class="display-controls">
-        <SelectDropdown
-          bind:value={$inventoryDisplay}
-          options={displayOptions}
-          buttonLabel={I18n('display_mode')}
-          hideCurrentlySelectedOption={true}
-        />
-      </div>
+      {#if !frozenDisplay}
+        <div class="display-controls">
+          <SelectDropdown
+            bind:value={$inventoryDisplay}
+            options={displayOptions}
+            buttonLabel={I18n('display_mode')}
+            hideCurrentlySelectedOption={true}
+          />
+        </div>
+      {/if}
     {/if}
   </div>
 

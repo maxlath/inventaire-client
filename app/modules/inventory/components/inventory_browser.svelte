@@ -28,6 +28,7 @@
   export let groupId: GroupId = null
   export let shelfId: ShelfId = null
   export let itemsShelvesByIds = null
+  export let frozenDisplay = null
 
   const itemsSearchFilters: ItemsSearchFilters = { ownerId, groupId, shelfId }
   setContext('items-search-filters', itemsSearchFilters)
@@ -83,8 +84,8 @@
     bind:textFilterItemsIds
     {intersectionWorkUris}
     {inventoryDisplay}
+    {frozenDisplay}
   />
-
   {#await waitForInventoryData}
     <div class="spinner-wrap">
       <Spinner center={true} />
@@ -92,7 +93,7 @@
   {:then}
     {#if pagination}
       <PaginatedItems
-        display={$inventoryDisplay}
+        display={frozenDisplay || $inventoryDisplay}
         {itemsIds}
         {itemsShelvesByIds}
         {shelfId}
