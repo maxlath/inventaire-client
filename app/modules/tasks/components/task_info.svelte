@@ -1,9 +1,8 @@
 <script lang="ts">
   import Link from '#app/lib/components/link.svelte'
-  import { imgSrc } from '#app/lib/handlebars_helpers/images'
-  import { loadInternalLink } from '#app/lib/utils'
   import Spinner from '#components/spinner.svelte'
-  import { i18n, I18n } from '#user/lib/i18n'
+  import { I18n } from '#user/lib/i18n'
+  import UserInfobox from '#users/components/user_infobox.svelte'
   import { getUsersByIds } from '#users/users_data'
 
   export let task
@@ -18,18 +17,16 @@
 {#await waitingForUsers}
   <Spinner center={true} />
 {:then}
-  <strong>{i18n('reporters')}: </strong>
+  <strong>{I18n('reporters')}</strong>
   <ul>
     {#each reporters as reporter}
-      <li class="creator-info">
-        <a
-          href={`/users/${reporter._id}/contributions`}
-          title={I18n('contributions_by', reporter)}
-          on:click={loadInternalLink}
-        >
-          <img src={imgSrc(reporter.picture, 32)} alt="" loading="lazy" />
-          <span class="username">{reporter.username}</span>
-        </a>
+      <li>
+        <UserInfobox
+          name={reporter.username}
+          picture={reporter.picture}
+          linkUrl={`/users/${reporter._id}/contributions`}
+          linkTitle={I18n('contributions_by', reporter)}
+        />
       </li>
     {/each}
   </ul>
@@ -37,28 +34,10 @@
 
 {#if clue}
   <li>
-    <strong>{i18n('clue')}: </strong>
+    <strong>{I18n('clue')}</strong>
     <Link
       url={`/entity/isbn:${clue}`}
       text={clue}
     />
   </li>
 {/if}
-
-<style lang="scss">
-  @import "#general/scss/utils";
-  .creator-info{
-    a{
-      display: block;
-      padding: 0.3em 0;
-      @include radius;
-      @include bg-hover($light-grey);
-    }
-  }
-  .username{
-    font-weight: normal;
-    @include sans-serif;
-    margin-inline-start: 0.2em;
-    margin-inline-end: 0.5em;
-  }
-</style>

@@ -1,9 +1,7 @@
 <script lang="ts">
-  import { imgSrc } from '#app/lib/handlebars_helpers/images'
   import { userContent } from '#app/lib/handlebars_helpers/user_content'
   import { icon } from '#app/lib/icons'
   import { onChange } from '#app/lib/svelte/svelte'
-  import { loadInternalLink } from '#app/lib/utils'
   import type { SerializedUser } from '#app/modules/users/lib/users'
   import Dropdown from '#components/dropdown.svelte'
   import Modal from '#components/modal.svelte'
@@ -12,6 +10,7 @@
   import { i18nTypesKeys } from '#listings/lib/entities_typing'
   import type { Listing } from '#server/types/listing'
   import { i18n } from '#user/lib/i18n'
+  import UserInfobox from '#users/components/user_infobox.svelte'
 
   export let listing: Listing
   export let isEditable: boolean
@@ -21,7 +20,7 @@
 
   let visibilitySummary, visibilitySummaryIcon, visibilitySummaryLabel, showListEditorModal
 
-  const { username, picture: userPicture, listingsPathname: userListingsPathname } = creator
+  const { username, picture, listingsPathname: userListingsPathname } = creator
 
   const i18nTypeKey = i18nTypesKeys[type]
 
@@ -68,17 +67,13 @@
     {/if}
   </div>
   <div class="creator-row">
-    <div class="creator-info">
-      <span class="label">{i18n('List creator')}</span>
-      <a
-        href={userListingsPathname}
-        title={i18n('see_all_listings_by_user', { username })}
-        on:click={loadInternalLink}
-      >
-        <img src={imgSrc(userPicture, 32)} alt="" loading="lazy" />
-        <span class="username">{username}</span>
-      </a>
-    </div>
+    <UserInfobox
+      linkUrl={userListingsPathname}
+      linkTitle={i18n('see_all_listings_by_user', { username })}
+      label={i18n('List creator')}
+      name={username}
+      {picture}
+    />
     <div class="right-section">
       <div class="listing-type">
         <span class="label">{i18n('Type')}</span>
@@ -134,19 +129,6 @@
   .label{
     color: $label-grey;
     display: block;
-  }
-  .creator-info{
-    a{
-      display: block;
-      padding: 0.3em 0;
-      @include radius;
-      @include bg-hover($light-grey);
-    }
-  }
-  .username{
-    font-weight: bold;
-    @include sans-serif;
-    margin-inline-start: 0.2em;
   }
   [slot="button-inner"]{
     @include tiny-button($grey);

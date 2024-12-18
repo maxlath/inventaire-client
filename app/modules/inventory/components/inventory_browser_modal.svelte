@@ -5,13 +5,14 @@
   import InventoryBrowser from '#inventory/components/inventory_browser.svelte'
   import { getInventoryView } from '#inventory/components/lib/inventory_browser_helpers'
   import { i18n } from '#user/lib/i18n'
+  import UserInfobox from '#users/components/user_infobox.svelte'
 
   export let user
   export let group
   export let isMainUser = false
   export let showModal = false
 
-  let itemsDataPromise, name, linkUrl
+  let itemsDataPromise, name, linkUrl, picture
 
   function closeModal () {
     showModal = false
@@ -25,8 +26,8 @@
   function updateModalData ({ user, group }) {
     if (!(user || group)) return
     if (user) {
-      itemsDataPromise = getInventoryView('user', user)
-      name = user.username
+      itemsDataPromise = getInventoryView('user', user);
+      ({ username: name, picture } = user)
       linkUrl = `/users/${name}`
     } else if (group) {
       itemsDataPromise = getInventoryView('group', group)
@@ -43,12 +44,24 @@
         <h2>
           {i18n('Public books')}
         </h2>
-        <Link
-          url={linkUrl}
-          text={name}
-          classNames="link"
-        />
       </div>
+      {#key name}
+        {#if user}
+          <UserInfobox
+            {linkUrl}
+            label={i18n('From user')}
+            {name}
+            {picture}
+          />
+        {:else if group}
+          <span class="label">{i18n('From group')}</span>
+          <Link
+            url={linkUrl}
+            text={name}
+            classNames="link"
+          />
+        {/if}
+      {/key}
       <InventoryBrowser
         {itemsDataPromise}
         ownerId={user?._id}
@@ -65,6 +78,7 @@
   .modal-wrapper{
     :global(.modal-inner){
       min-width: 80vw;
+      margin: 0 0.5em
     }
     .header{
       @include display-flex(column, center);
@@ -74,8 +88,16 @@
       margin-block-start: 1em;
       font-size: 1.4em;
     }
+    .label{
+      color: $label-grey;
+      display: block;
+    }
     :global(.link){
-      font-size: 1.2em;
+      display: block;
+      padding: 0.5em;
+      font-weight: bold;
+      @include radius;
+      @include bg-hover($light-grey);
     }
   }
 </style>
