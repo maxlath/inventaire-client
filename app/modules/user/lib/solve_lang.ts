@@ -16,7 +16,7 @@ export function solveLang (userLanguage) {
 }
 
 // Adapted from: https://github.com/maxogden/browser-locale/blob/master/index.js
-const getBrowserLocalLang = function () {
+export const getBrowserLocalLang = function () {
   // Latest versions of Chrome and Firefox set this correctly
   if (navigator.languages && navigator.languages.length) return navigator.languages[0]
   // IE only

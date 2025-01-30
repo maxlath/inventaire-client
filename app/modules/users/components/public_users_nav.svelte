@@ -9,7 +9,8 @@
   import Marker from '#map/components/marker.svelte'
   import PositionRequired from '#map/components/position_required.svelte'
   import UserMarker from '#map/components/user_marker.svelte'
-  import { getBbox } from '#map/lib/map'
+  import ZoomInToDisplayMore from '#map/components/zoom_in_to_display_more.svelte'
+  import { getBbox, isMapTooZoomedOut } from '#map/lib/map'
   import { i18n, I18n } from '#user/lib/i18n'
   import { user } from '#user/user_store'
   import { getGroupsByPosition, getUsersByPosition } from '#users/components/lib/public_users_nav_helpers'
@@ -25,6 +26,7 @@
 
   let usersById = {}, groupsById = {}
   let map, bbox, mapViewLatLng, mapZoom, flash
+  let zoomInToDisplayMore, displayedElementsCount
 
   const getByPosition = async (name, bbox) => {
     try {
@@ -43,7 +45,8 @@
   let waitForUsers, waitForGroups
   function fetchAndShowUsersAndGroupsOnMap () {
     if (!map) return
-    if (mapIsTooZoomedOut()) return
+    displayedElementsCount = usersInBounds.length + groupsInBounds.length
+    if (isMapTooZoomedOut(mapZoom, displayedElementsCount)) return
     bbox = getBbox(map)
     if (!bbox) return
 
@@ -66,23 +69,11 @@
     }
   }
 
-  function mapIsTooZoomedOut () {
-    if (mapZoom >= 10) return false
-    if (!usersInBounds || !groupsInBounds) return false
-    const displayedElementsCount = usersInBounds.length + groupsInBounds.length
-    return displayedElementsCount > 20
-  }
-
-  let zoomInToDisplayMore = false
-  function updateZoomStatus () {
-    zoomInToDisplayMore = mapIsTooZoomedOut()
-  }
-
   let usersInBounds, groupsInBounds
 
   $: onChange(map, fetchAndShowUsersAndGroupsOnMap)
   $: onChange($user.position, onMainUserPositionChange)
-  $: onChange(mapZoom, usersInBounds, groupsInBounds, updateZoomStatus)
+  $: onChange(mapZoom, usersInBounds, groupsInBounds)
 
   let selectedUser, selectedGroup
   function onSelectUser (e) {
@@ -168,12 +159,12 @@
               </Marker>
             {/each}
           {/if}
+          <ZoomInToDisplayMore
+            {mapZoom}
+            {displayedElementsCount}
+            bind:zoomInToDisplayMore
+          />
 
-          {#if zoomInToDisplayMore}
-            <div class="zoom-in-overlay">
-              <p>{i18n('Zoom-in to display more')}</p>
-            </div>
-          {/if}
         </LeafletMap>
       {/if}
     </div>
@@ -245,14 +236,6 @@
       line-height: 0;
       border-end-end-radius: $global-radius;
     }
-  }
-
-  .zoom-in-overlay{
-    background-color: rgba($dark-grey, 0.5);
-    @include position(absolute, 0, 0, 0, 0);
-    // Above map but below controls
-    z-index: 400;
-    @include display-flex(column, center, center);
   }
 
   /* Small screens */

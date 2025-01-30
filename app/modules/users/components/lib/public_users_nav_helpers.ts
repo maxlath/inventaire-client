@@ -24,7 +24,7 @@ export async function getGroupsByPosition ({ bbox }) {
   return groupsById
 }
 
-async function getDocsByPosition (name, bbox) {
+export async function getDocsByPosition (name, bbox) {
   const { [name]: docs } = await preq.get(API[name].searchByPosition(bbox))
   return docs
 }

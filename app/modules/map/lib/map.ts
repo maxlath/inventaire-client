@@ -36,3 +36,9 @@ export function uniqBounds (bounds) {
 
 const stringifyBound = bound => JSON.stringify(bound)
 const parseStringifiedBound = stringifiedBound => JSON.parse(stringifiedBound)
+
+export function isMapTooZoomedOut (mapZoom, displayedElementsCount) {
+  if (mapZoom >= 10) return false
+  if (!displayedElementsCount) return false
+  return displayedElementsCount > 20
+}
