@@ -5,7 +5,7 @@
   import Spinner from '#components/spinner.svelte'
   import ItemsCascade from '#inventory/components/items_cascade.svelte'
   import ItemsTable from '#inventory/components/items_table.svelte'
-  import { I18n } from '#user/lib/i18n'
+  import { i18n } from '#user/lib/i18n'
 
   export let items = []
 
@@ -22,7 +22,7 @@
 </script>
 {#if isNonEmptyArray(items)}
   <section>
-    <h3>{I18n('some books in this area')}</h3>
+    <h3>{i18n('Some books in this area')}</h3>
     {#if $screen.isSmallerThan('$smaller-screen')}
       <ItemsTable {items} haveSeveralOwners={true} />
     {:else}
@@ -36,7 +36,7 @@
   {:then}
     {#if isNonEmptyArray(params.items)}
       <section>
-        <h3>{I18n('some of the last books listed')}</h3>
+        <h3>{i18n('Some of the last books listed')}</h3>
         {#await waiting}
           <Spinner center={true} />
         {:then}
