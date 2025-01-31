@@ -310,7 +310,7 @@ async function getEntityModel (uri, refresh?) {
 
 async function showEntityEdit (entity: SerializedEntity) {
   if (!entity) return app.execute('show:error:missing')
-  const { uri, type, label, editPathname, isWikidataEntity } = entity
+  const { uri, type, label, editPathname } = entity
   if (!editPathname) {
     throw newError('this entity can not be edited', 400, { uri, type })
   }
@@ -318,18 +318,14 @@ async function showEntityEdit (entity: SerializedEntity) {
 
   rejectRemovedPlaceholder(entity)
 
-  if (isWikidataEntity && !app.user.hasWikidataOauthTokens()) {
-    return showWikidataEditIntro(entity)
-  } else {
-    if (type == null) throw newError('invalid entity type', 400, { entity })
-    const { default: EntityEdit } = await import('./components/editor/entity_edit.svelte')
-    app.layout.showChildComponent('main', EntityEdit, {
-      props: {
-        entity,
-      },
-    })
-    app.navigate(editPathname, { metadata: { title: `${label} - ${i18n('edit')}` } })
-  }
+  if (type == null) throw newError('invalid entity type', 400, { entity })
+  const { default: EntityEdit } = await import('./components/editor/entity_edit.svelte')
+  app.layout.showChildComponent('main', EntityEdit, {
+    props: {
+      entity,
+    },
+  })
+  app.navigate(editPathname, { metadata: { title: `${label} - ${i18n('edit')}` } })
 }
 
 async function showWikidataEditIntro (entity: SerializedWdEntity) {
