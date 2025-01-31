@@ -1,9 +1,9 @@
 <script lang="ts">
-  import app from '#app/app'
   import Flash from '#app/lib/components/flash.svelte'
   import { onChange } from '#app/lib/svelte/svelte'
   import Spinner from '#components/spinner.svelte'
   import InventoryBrowserModal from '#inventory/components/inventory_browser_modal.svelte'
+  import { getByBbox } from '#inventory/lib/queries'
   import GroupMarker from '#map/components/group_marker.svelte'
   import LeafletMap from '#map/components/leaflet_map.svelte'
   import Marker from '#map/components/marker.svelte'
@@ -35,7 +35,7 @@
 
     const lang = getBrowserLocalLang();
     ([ { users, items }, groups ] = await Promise.all([
-      app.request('items:getByBbox', { items, bbox, lang })
+      getByBbox({ items, bbox, lang })
         .catch(err => {
           if (err.message !== 'no items found') flash = err
         }),
