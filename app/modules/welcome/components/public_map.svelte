@@ -44,7 +44,7 @@
     if (items.length === 0) {
       flash = {
         type: 'warning',
-        message: i18n('No visible books in this area'),
+        message: i18n('No public book books in this area'),
       }
     } else { flash = null }
   }
