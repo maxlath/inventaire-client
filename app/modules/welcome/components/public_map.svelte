@@ -21,6 +21,7 @@
   // to not ask to geolocate as soon as landing on the page.
   const landingPageMapPosition = [ 45.744, 4.821 ]
   let map, mapZoom = 13, bbox, flash, displayedElementsCount
+  let zoomInToDisplayMore = false
 
   const waitingForUsers = fetchItemsUsersAndGroups()
 
@@ -48,13 +49,7 @@
     } else { flash = null }
   }
 
-  let zoomInToDisplayMore = false
-  function updateZoomStatus () {
-    zoomInToDisplayMore = isMapTooZoomedOut()
-  }
-
   $: onChange(map, fetchItemsUsersAndGroups)
-  $: onChange(mapZoom, updateZoomStatus)
 </script>
 
 <section>
@@ -97,6 +92,7 @@
         <ZoomInToDisplayMore
           {mapZoom}
           {displayedElementsCount}
+          bind:zoomInToDisplayMore
         />
       {/await}
     </LeafletMap>
